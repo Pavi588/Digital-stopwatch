@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Stopwatch — Synchronous Sequential Circuits · EC2201</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">⏱</span>
+    <div class="brand-text">
+      <strong>Digital Stopwatch</strong>
+      <small>EC2201 — Synchronous Sequential Circuits</small>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1. HOME -->
+  <section id="home" class="section hero">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">EC2201 · Digital Electronics</p>
+        <h1>Digital Stopwatch using<br>Synchronous Sequential Circuits</h1>
+        <p class="lede">A digital stopwatch measures elapsed time using clock pulses, sequential states, counters and display logic. Every count in this project happens on a clock edge — never on a raw timer.</p>
+        <button class="btn btn-primary" id="launchSimBtn">Launch Simulator ↓</button>
+      </div>
+      <div class="concept-cards">
+        <div class="concept-card">
+          <span class="concept-icon">◷</span>
+          <h3>Clock</h3>
+          <p>Generates the periodic rising edges that drive every state and counter change.</p>
+        </div>
+        <div class="concept-card">
+          <span class="concept-icon">▦</span>
+          <h3>State Register</h3>
+          <p>Holds the current FSM state (IDLE, RUNNING, STOPPED) between clock edges.</p>
+        </div>
+        <div class="concept-card">
+          <span class="concept-icon">#</span>
+          <h3>Counter</h3>
+          <p>MOD-60 seconds and minutes counters that increment only on an enabled clock edge.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM & OBJECTIVE -->
+  <section id="problem" class="section">
+    <h2>Problem &amp; Objective</h2>
+    <div class="two-col">
+      <div class="panel">
+        <h3>Problem</h3>
+        <p>Manual timing is not accurate for many applications. A digital stopwatch provides accurate elapsed-time measurement using digital circuits rather than human reaction time.</p>
+        <h3>Objective</h3>
+        <p>Design and simulate a stopwatch using synchronous sequential logic, where all state and counter changes are synchronized to a common clock signal.</p>
+      </div>
+      <div class="panel">
+        <h3>Key Requirements</h3>
+        <ul class="req-list">
+          <li>Generate clock pulses</li>
+          <li>Define timing states</li>
+          <li>Implement counters</li>
+          <li>Implement START</li>
+          <li>Implement STOP</li>
+          <li>Implement RESET</li>
+          <li>Display elapsed time</li>
+          <li>Test timing transitions</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SEQUENTIAL LOGIC MODEL -->
+  <section id="model" class="section">
+    <h2>Synchronous Sequential Logic Model</h2>
+    <p class="section-intro">The counter changes only at the active clock edge. Therefore this is a synchronous sequential system — every block below only updates in step with the clock.</p>
+    <div class="block-diagram" id="blockDiagram">
+      <div class="block" id="blk-clock">
+        <span class="block-label">CLOCK</span>
+        <span class="pulse-dot" id="clockPulseDot"></span>
+      </div>
+      <div class="arrow" id="arrow1"><span class="flow-dot"></span></div>
+      <div class="block" id="blk-register">
+        <span class="block-label">State Register</span>
+        <span class="block-sub">Flip-Flops</span>
+      </div>
+      <div class="arrow" id="arrow2"><span class="flow-dot"></span></div>
+      <div class="block" id="blk-counter">
+        <span class="block-label">Counter Logic</span>
+        <span class="block-sub">Seconds 00–59 · Minutes 00–59</span>
+      </div>
+      <div class="arrow" id="arrow3"><span class="flow-dot"></span></div>
+      <div class="block" id="blk-display">
+        <span class="block-label">Display Logic</span>
+        <span class="block-sub">MM : SS</span>
+      </div>
+    </div>
+    <p class="caption">Run the simulator below and watch the pulse travel through each block on every clock edge.</p>
+  </section>
+
+  <!-- CLOCK SIMULATION -->
+  <section id="clock-sim" class="section alt">
+    <h2>Clock Simulation</h2>
+    <div class="clock-panel">
+      <div class="clock-stats">
+        <div class="stat">
+          <span class="stat-label">Clock Frequency</span>
+          <span class="stat-value" id="clockFreqDisplay">1 Hz</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Clock State</span>
+          <span class="stat-value" id="clockStateDisplay">LOW</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Clock Pulses</span>
+          <span class="stat-value mono" id="clockPulseDisplay">0000</span>
+        </div>
+      </div>
+      <div class="clock-wave">
+        <div class="wave-track" id="waveTrack"></div>
+        <span class="edge-flag" id="edgeFlag">▲ RISING EDGE</span>
+      </div>
+      <div class="freq-select">
+        <span>Frequency:</span>
+        <button class="freq-btn active" data-freq="1">1 Hz</button>
+        <button class="freq-btn" data-freq="2">2 Hz</button>
+        <button class="freq-btn" data-freq="5">5 Hz</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. STOPWATCH SIMULATOR -->
+  <section id="simulator" class="section">
+    <h2>Stopwatch Simulator</h2>
+    <div class="simulator-grid">
+      <div class="display-panel">
+        <div class="seven-seg" id="mainDisplay">00 : 00</div>
+        <div class="state-pill" id="statePill">IDLE</div>
+        <div class="controls">
+          <button class="btn btn-start" id="startBtn">START</button>
+          <button class="btn btn-stop" id="stopBtn">STOP</button>
+          <button class="btn btn-reset" id="resetBtn">RESET</button>
+          <button class="btn btn-lap" id="lapBtn">LAP</button>
+        </div>
+      </div>
+      <div class="lap-panel">
+        <h3>Lap Times</h3>
+        <table class="data-table" id="lapTable">
+          <thead><tr><th>#</th><th>Time</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="empty-note" id="lapEmpty">No laps recorded yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 & 8. STATE MACHINE + REGISTER -->
+  <section id="state-machine" class="section alt">
+    <h2>State Machine</h2>
+    <div class="fsm-diagram">
+      <div class="fsm-node" id="node-idle">IDLE</div>
+      <div class="fsm-edge">START ▸</div>
+      <div class="fsm-node" id="node-running">RUNNING</div>
+      <div class="fsm-edge">STOP ▸</div>
+      <div class="fsm-node" id="node-stopped">STOPPED</div>
+    </div>
+    <p class="caption">RUNNING + RESET → IDLE &nbsp;·&nbsp; STOPPED + START → RUNNING &nbsp;·&nbsp; STOPPED + RESET → IDLE</p>
+
+    <div class="register-panel">
+      <div class="stat">
+        <span class="stat-label">Current State (encoded)</span>
+        <span class="stat-value mono" id="stateEncoded">00</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Decoded State</span>
+        <span class="stat-value" id="stateDecoded">IDLE</span>
+      </div>
+    </div>
+    <p class="caption note">Flip-flops conceptually store the current state between clock edges. This is a software simulation of that digital-logic concept — no physical flip-flop hardware is implemented in the browser.</p>
+  </section>
+
+  <!-- 10 & 11. COUNTERS -->
+  <section id="counters" class="section">
+    <h2>Counter Module</h2>
+    <div class="counter-grid">
+      <div class="counter-box">
+        <span class="stat-label">Seconds Counter (MOD-60)</span>
+        <span class="counter-value" id="secCounterVal">00</span>
+      </div>
+      <div class="overflow-arrow" id="overflowArrow">overflow ▸</div>
+      <div class="counter-box">
+        <span class="stat-label">Minutes Counter (MOD-60)</span>
+        <span class="counter-value" id="minCounterVal">00</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. TRUTH TABLE -->
+  <section id="truth-table" class="section alt">
+    <h2>Truth Table — Next-State Logic</h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Current State</th><th>START</th><th>STOP</th><th>RESET</th><th>Next State</th><th>Counter</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>IDLE</td><td>1</td><td>0</td><td>0</td><td>RUNNING</td><td>ENABLE</td></tr>
+          <tr><td>RUNNING</td><td>0</td><td>1</td><td>0</td><td>STOPPED</td><td>HOLD</td></tr>
+          <tr><td>RUNNING</td><td>0</td><td>0</td><td>1</td><td>IDLE</td><td>RESET</td></tr>
+          <tr><td>STOPPED</td><td>1</td><td>0</td><td>0</td><td>RUNNING</td><td>ENABLE</td></tr>
+          <tr><td>STOPPED</td><td>0</td><td>0</td><td>1</td><td>IDLE</td><td>RESET</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="req-list">
+      <li><strong>State register</strong> — stores the current state until the next clock edge.</li>
+      <li><strong>Next-state logic</strong> — combinational function of current state and inputs.</li>
+      <li><strong>Counter enable</strong> — asserted only while the state is RUNNING.</li>
+      <li><strong>Reset condition</strong> — forces the next state to IDLE and clears counters.</li>
+    </ul>
+  </section>
+
+  <!-- 13. TIMING DIAGRAM -->
+  <section id="timing" class="section">
+    <h2>Timing Diagram</h2>
+    <canvas id="timingCanvas" width="900" height="220"></canvas>
+    <p class="caption">Updates live as you operate the simulator above (CLOCK, START, STOP, RESET, COUNTER ENABLE).</p>
+  </section>
+
+  <!-- 16. EVENT LOG -->
+  <section id="event-log" class="section alt">
+    <h2>Live Event Log</h2>
+    <div class="log-box" id="eventLog"></div>
+  </section>
+
+  <!-- 14 & 15. TEST CASES -->
+  <section id="test-cases" class="section">
+    <h2>Test Cases</h2>
+    <div class="test-summary">
+      <div class="stat"><span class="stat-label">Total Tests</span><span class="stat-value" id="totalTests">15</span></div>
+      <div class="stat"><span class="stat-label">Passed</span><span class="stat-value pass" id="passedTests">—</span></div>
+      <div class="stat"><span class="stat-label">Failed</span><span class="stat-value fail" id="failedTests">—</span></div>
+    </div>
+    <div class="test-controls">
+      <button class="btn btn-primary" id="runTestsBtn">RUN ALL TESTS</button>
+      <button class="btn btn-ghost" id="resetTestsBtn">RESET TESTS</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="testTable">
+        <thead>
+          <tr><th>Test ID</th><th>Input</th><th>Expected</th><th>Actual</th><th>Result</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 19. DATA / SYNTHETIC DATASET -->
+  <section id="dataset" class="section alt">
+    <h2>Synthetic Test Dataset</h2>
+    <p class="section-intro">A reproducible synthetic dataset generated from the test run above, plus a chart of clock pulses versus counter value.</p>
+    <canvas id="datasetChart" width="900" height="240"></canvas>
+    <div class="table-wrap">
+      <table class="data-table" id="datasetTable">
+        <thead>
+          <tr><th>Test ID</th><th>Clock Pulse</th><th>Current State</th><th>Start</th><th>Stop</th><th>Reset</th><th>Sec</th><th>Min</th><th>Next State</th><th>Expected</th><th>Actual</th><th>Result</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 17. RESULTS -->
+  <section id="results" class="section">
+    <h2>Results</h2>
+    <div class="results-grid">
+      <div class="panel">
+        <h3>Simulation Result</h3>
+        <ul class="result-list" id="simResultList">
+          <li>Clock: <span class="ok">Working</span></li>
+          <li>State Machine: <span class="ok">Working</span></li>
+          <li>Counter: <span class="ok">Working</span></li>
+          <li>START: <span class="ok">Working</span></li>
+          <li>STOP: <span class="ok">Working</span></li>
+          <li>RESET: <span class="ok">Working</span></li>
+          <li>Display: <span class="ok">Working</span></li>
+          <li>Test Cases: <span id="testCaseStatus">Not run yet</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Summary</h3>
+        <div class="clock-stats">
+          <div class="stat"><span class="stat-label">Final State</span><span class="stat-value" id="resFinalState">IDLE</span></div>
+          <div class="stat"><span class="stat-label">Final Time</span><span class="stat-value mono" id="resFinalTime">00:00</span></div>
+          <div class="stat"><span class="stat-label">Total Clock Pulses</span><span class="stat-value" id="resPulses">0</span></div>
+          <div class="stat"><span class="stat-label">Total Tests</span><span class="stat-value" id="resTotalTests">15</span></div>
+          <div class="stat"><span class="stat-label">Passed Tests</span><span class="stat-value pass" id="resPassed">—</span></div>
+          <div class="stat"><span class="stat-label">Failed Tests</span><span class="stat-value fail" id="resFailed">—</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18. ASSUMPTIONS + ABOUT -->
+  <section id="about" class="section alt">
+    <h2>About This Project</h2>
+    <div class="two-col">
+      <div class="panel">
+        <h3>Assumptions</h3>
+        <ol class="req-list">
+          <li>The simulation uses a software-generated clock.</li>
+          <li>Default clock frequency is 1 Hz.</li>
+          <li>The stopwatch uses MM:SS display.</li>
+          <li>Seconds counter is MOD-60.</li>
+          <li>Minutes counter is MOD-60.</li>
+          <li>Counter changes only on the rising edge of the clock.</li>
+          <li>START enables counting.</li>
+          <li>STOP holds the current count.</li>
+          <li>RESET clears the counters and returns the system to IDLE.</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h3>Project Info</h3>
+        <p><strong>Title:</strong> Digital Stopwatch using Synchronous Sequential Circuits</p>
+        <p><strong>Course:</strong> EC2201 — Digital Electronics</p>
+        <p><strong>Architecture:</strong> Clock → StateMachine → Counter → Stopwatch → TestRunner, each as a separate JavaScript class, driven entirely by clock edges rather than a raw timer.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Digital Stopwatch · EC2201 Digital Electronics · Software simulation of a synchronous sequential circuit</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
