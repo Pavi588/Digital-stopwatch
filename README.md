@@ -138,7 +138,7 @@ logic and counter logic behave exactly as specified in the truth table.
 
 ---
 
-## How to Demonstrate in a College Presentation
+## How to Demonstrate
 
 1. Open **Home** and describe the three building blocks (Clock, State Register, Counter).
 2. Scroll to **Synchronous Sequential Logic Model** and explain the block diagram —
